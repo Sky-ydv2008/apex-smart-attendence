@@ -1,23 +1,33 @@
 FROM python:3.11-slim
 
-# Install system dependencies for OpenCV and image processing
+# Install system dependencies for OpenCV, EasyOCR, and Node.js for building React
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libgl1-mesa-glx \
     libglib2.0-0 \
     libgomp1 \
     curl \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy python requirements and install
+# Install Python requirements
 COPY backend/requirements.txt /app/backend/requirements.txt
 RUN pip install --no-cache-dir -r /app/backend/requirements.txt
 
-# Copy backend application code
+# Build Frontend
+COPY frontend /app/frontend
+WORKDIR /app/frontend
+RUN npm install && npm run build
+
+# Set up Backend
+WORKDIR /app
 COPY backend /app/backend
-COPY frontend/dist /app/frontend/dist
+
+# Seed initial database
+RUN python /app/backend/app/seed.py
 
 ENV PYTHONPATH=/app/backend
 EXPOSE 8000
