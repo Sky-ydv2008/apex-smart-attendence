@@ -43,23 +43,9 @@ app.include_router(reports.router)
 app.include_router(websockets.router)
 
 FRONTEND_DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
-if FRONTEND_DIST.exists():
+if (FRONTEND_DIST / "assets").exists():
     app.mount("/assets", StaticFiles(directory=str(FRONTEND_DIST / "assets")), name="assets")
 
-    @app.get("/")
-    def read_index():
-        from fastapi.responses import FileResponse
-        return FileResponse(str(FRONTEND_DIST / "index.html"))
-else:
-    @app.get("/")
-    def root():
-        return {
-            "status": "online",
-            "app": "AttendAI - Offline Smart Attendance System",
-            "version": "1.0.0",
-            "mode": "100% Local / Zero Cloud Dependency",
-            "ai_engine": "ID-Card OCR + Face Verification Dual Engine Ready"
-        }
 @app.get("/api/health")
 def health_check():
     return {
@@ -67,4 +53,18 @@ def health_check():
         "offline_mode": True,
         "database": "connected",
         "ai_models_loaded": True
+    }
+
+@app.get("/{full_path:path}")
+def serve_frontend_spa(full_path: str):
+    from fastapi.responses import FileResponse
+    index_file = FRONTEND_DIST / "index.html"
+    if index_file.exists():
+        return FileResponse(str(index_file))
+    return {
+        "status": "online",
+        "app": "AttendAI - Offline Smart Attendance System",
+        "version": "1.0.0",
+        "mode": "100% Local / Zero Cloud Dependency",
+        "ai_engine": "ID-Card OCR + Face Verification Dual Engine Ready"
     }
