@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: attendai-smart-attendance
+    env: docker
+    dockerfilePath: Dockerfile
+    region: singapore
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
