@@ -31,7 +31,7 @@ app.add_middleware(
 )
 
 # Mount static uploads directory for photos & generated ID cards
-app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR.parent)), name="uploads")
+app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
 
 # Include Routers
 app.include_router(auth.router)

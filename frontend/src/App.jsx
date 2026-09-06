@@ -1,122 +1,72 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React, { useState } from 'react';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
 
-function App() {
-  const [count, setCount] = useState(0)
+import Login from './pages/Login';
+import Dashboard from './pages/Dashboard';
+import LiveScanner from './pages/LiveScanner';
+import Sessions from './pages/Sessions';
+import ClassesStudents from './pages/ClassesStudents';
+import Records from './pages/Records';
+import Reports from './pages/Reports';
+import IDCardStudio from './pages/IDCardStudio';
+
+function MainApp() {
+  const { teacher, loading } = useAuth();
+  const [activePage, setActivePage] = useState('dashboard');
+  const [selectedSessionId, setSelectedSessionId] = useState(null);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center text-indigo-400 font-bold">
+        <span>Initializing AttendAI Engine...</span>
+      </div>
+    );
+  }
+
+  if (!teacher) {
+    return <Login />;
+  }
+
+  const renderPage = () => {
+    switch (activePage) {
+      case 'dashboard':
+        return <Dashboard setActivePage={setActivePage} setSelectedSessionId={setSelectedSessionId} />;
+      case 'scanner':
+        return <LiveScanner selectedSessionId={selectedSessionId} />;
+      case 'sessions':
+        return <Sessions setActivePage={setActivePage} setSelectedSessionId={setSelectedSessionId} />;
+      case 'classes':
+        return <ClassesStudents />;
+      case 'records':
+        return <Records />;
+      case 'reports':
+        return <Reports />;
+      case 'cards':
+        return <IDCardStudio />;
+      default:
+        return <Dashboard setActivePage={setActivePage} setSelectedSessionId={setSelectedSessionId} />;
+    }
+  };
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans antialiased">
+      <Navbar activePage={activePage} setActivePage={setActivePage} />
+      <div className="flex flex-1">
+        <Sidebar activePage={activePage} setActivePage={setActivePage} />
+        <main className="flex-1 p-6 max-w-7xl mx-auto w-full">
+          {renderPage()}
+        </main>
+      </div>
+    </div>
+  );
 }
 
-export default App
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
+  );
+}
